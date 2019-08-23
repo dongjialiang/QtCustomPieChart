@@ -4,21 +4,24 @@ CustomPieChart::CustomPieChart(QWidget * parent)
     : QWidget (parent) {
     title = "默认标题"; // 标题名字
     total = 0;
+
     initPieChartWidget();
 }
-CustomPieChart::CustomPieChart(QString title,
-                               QString tag, int data, QColor color, QWidget * parent)
+CustomPieChart::CustomPieChart(const QString &title, const QString &tag, const int &data,
+                               const QColor &color, QWidget * parent)
     : QWidget (parent) {
     this->title = title; // 标题名字
     total = 1;           // 数据长度
     sum = data;          // 数据总量
+
     addSlice(tag,  data, color);
     initPieChartWidget();
 }
-CustomPieChart::CustomPieChart(QString title, QList<QString> tagList, QList<int> dataList,
+CustomPieChart::CustomPieChart(const QString &title, QStringList tagList, QList<int> dataList,
                                QList<QColor> colorList, QWidget * parent)
     : QWidget (parent) {
     this->title = title; // 标题名字
+
     setSeries(tagList, dataList, colorList);
     initPieChartWidget();
 }
@@ -27,8 +30,7 @@ CustomPieChart::~CustomPieChart() {}
 bool CustomPieChart::eventFilter(QObject *widget, QEvent *event) {
     if (widget == pieChartWidget && event->type() == QEvent::Paint && total != 0) {
         drawPieChart(); // 绘制饼图部件
-    }
-    if (widget == titleWidget && event->type() == QEvent::Paint) {
+    } else if (widget == titleWidget && event->type() == QEvent::Paint) {
         QPainter painter(titleWidget);
         painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing); // 绘图和绘图文字抗锯齿
         painter.save();
@@ -63,13 +65,14 @@ void CustomPieChart::drawPieChart() {
 
     fontSize = globalFont.pointSize();
     /* 绘制总数 */
-    sumFont.setPointSize(!isSetSumFont ? int(radius / 2.5) : sumFont.pointSize());
+    sumFont.setPointSizeF(!isSetSumFont ? radius / 2.5 : sumFont.pointSizeF());
     painter.setFont(sumFont);
     painter.setPen(QColor(54, 235, 171));
     painter.drawText(QRectF(-radius, -radius - (radius / 4), diameter, diameter),
                      Qt::AlignCenter, QString::number(sum));
-    /* 绘制总数文本 */
+    /* 绘制"总数"文本 */
     painter.setPen(Qt::white);
+    sumTextFont.setPointSizeF(!isSetSumTextFont ? radius / 5 : sumTextFont.pointSizeF());
     painter.setFont(sumTextFont);
     painter.drawText(QRectF(-radius, -radius + fontSize, diameter, diameter), Qt::AlignCenter, "总数");
 
@@ -82,7 +85,7 @@ void CustomPieChart::drawPieChart() {
         startAngle += (count > 0)
                 ? 360 * dataList[count - 1] / sum : 0;
         double radian = angle / 2 + startAngle; // 当前弧度(所在扇形的二等分角度 + 所在扇形的起始角度)
-        double offset = radius / fontSize;      // 偏移量
+        double offset = fontSize;               // 偏移量
         double offsetX = 0;                     // x轴偏移量
         double offsetY = 0;                     // y轴偏移量
         /* 绘制扇形区域 */
@@ -96,15 +99,17 @@ void CustomPieChart::drawPieChart() {
         radialGradient.setColorAt(1, qFuzzyCompare(ringSize, 1)
                                   ? Qt::transparent : colorList[count]);
         painter.setBrush(radialGradient);
-        painter.drawPie(QRectF(-radius, -radius, diameter, diameter), startLength, arcLength); // 画饼图的扇形区域
+        painter.drawPie(QRectF(-radius, -radius, diameter, diameter), startLength, arcLength); // 绘制饼图的扇形区域
         /* 绘制说明 */
         painter.setPen(colorList[count]);
         painter.setBrush(colorList[count]);
+        legendFont.setPointSizeF(!isSetLegendFont ? radius / 5 : legendFont.pointSizeF());
         painter.setFont(legendFont);
         fontSize = legendFont.pointSize();
-        painter.drawRect(QRectF(-(radius * 2.3), -(radius / 2) + count * (fontSize + 6), 5, 5));
-        painter.drawText(QRectF(-(radius * 2.1), -(radius / 1.8) + count * (fontSize + 6), radius, radius), tagList[count]);
+        painter.drawRect(QRectF(-(radius * 2.1 + fontSize * 1.2), -(radius / 2.1) + count * (fontSize * 1.3), fontSize / 2, fontSize / 2));
+        painter.drawText(QRectF(-(radius * 2.1), -(radius / 2.1 + fontSize / 3) + count * (fontSize * 1.3), radius, radius), tagList[count]);
         /* 绘制标签折线 */
+        tagFont.setPointSizeF(!isSetTagFont ? radius / 5 : tagFont.pointSizeF());
         painter.setFont(tagFont);
         fontSize = tagFont.pointSize();
         QPointF point = QPointF(midPoint + radius * cos(radian * M_PI / 180),
@@ -153,12 +158,11 @@ void CustomPieChart::drawPieChart() {
 }
 /* 初始化饼图部件 */
 void CustomPieChart::initPieChartWidget() {
-    QFont tempFont;
-    tempFont.setPointSize(10);
-    setGlobalFont(tempFont);
-    isSetSumFont = false;
     isSetTitleFont = false;
-
+    isSetTagFont = false;
+    isSetLegendFont = false;
+    isSetSumFont = false;
+    isSetSumTextFont = false;
     setRingSize(0.6);
     /* 标题部件 */
     titleWidget = new QWidget(this);
@@ -175,15 +179,15 @@ void CustomPieChart::initPieChartWidget() {
     setLayout(vBoxLayout);
 }
 /* 增加切片 */
-void CustomPieChart::addSlice(QString tag, int data, QColor color) {
-    tagList << tag;          // 标签名列表
-    dataList << data;        // 数据列表
-    colorList << color;      // 颜色列表
-    total = dataList.size(); // 数据表长度
-    sum += (total == 1) ? 0 : dataList[total - 1];
+void CustomPieChart::addSlice(const QString &tag, const int &data, const QColor &color) {
+    tagList << tag;                                // 标签名列表
+    dataList << data;                              // 数据列表
+    colorList << color;                            // 颜色列表
+    total = dataList.size();                       // 数据表长度
+    sum += (total == 1) ? 0 : dataList[total - 1]; // 数据总量
 }
 /* 设置系列 */
-void CustomPieChart::setSeries(QList<QString> tagList, QList<int> dataList, QList<QColor> colorList) {
+void CustomPieChart::setSeries(QStringList tagList, QList<int> dataList, QList<QColor> colorList) {
     total = dataList.size();     // 数据表长度
     sum = 0;                     // 数据总量
     this->tagList = tagList;     // 标签名列表
@@ -194,40 +198,46 @@ void CustomPieChart::setSeries(QList<QString> tagList, QList<int> dataList, QLis
     }
 }
 /* 设置全局字体 */
-void CustomPieChart::setGlobalFont(QFont font) {
+void CustomPieChart::setGlobalFont(const QFont &font) {
     globalFont = font;
     titleFont = font;
-    isSetTitleFont = true;
     tagFont = font;
     legendFont = font;
     sumFont = font;
     sumTextFont = font;
     sumFont = font;
+    isSetTitleFont = true;
+    isSetTagFont = true;
+    isSetLegendFont = true;
     isSetSumFont = true;
+    isSetSumTextFont = true;
 }
 /* 设置标题字体 */
-void CustomPieChart::setTitleFont(QFont font) {
+void CustomPieChart::setTitleFont(const QFont &font) {
     titleFont = font;
     isSetTitleFont = true;
 }
 /* 设置标签字体 */
-void CustomPieChart::setTagFont(QFont font) {
+void CustomPieChart::setTagFont(const QFont &font) {
     tagFont = font;
+    isSetTagFont = true;
 }
 /* 设置说明字体 */
-void CustomPieChart::setLegendFont(QFont font) {
+void CustomPieChart::setLegendFont(const QFont &font) {
     legendFont = font;
+    isSetLegendFont = true;
 }
 /* 设置总数字体 */
-void CustomPieChart::setSumFont(QFont font) {
+void CustomPieChart::setSumFont(const QFont &font) {
     sumFont = font;
     isSetSumFont = true;
 }
 /* 设置"总数"文本字体 */
-void CustomPieChart::setSumTextFont(QFont font) {
+void CustomPieChart::setSumTextFont(const QFont &font) {
     sumTextFont = font;
+    isSetSumTextFont = true;
 }
 /* 设置圆环大小 */
-void CustomPieChart::setRingSize(double ringSize) {
+void CustomPieChart::setRingSize(const double &ringSize) {
     this->ringSize = (ringSize > 1) ? 1 : ringSize;
 }

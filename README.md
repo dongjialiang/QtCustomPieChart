@@ -12,15 +12,18 @@
 ```
 #### Create a custom pie chart widget.
 ```c++
-    CustomPieChart * pieChart = new CustomPieChart(this); // CustomPieChart(parent)
+    CustomPieChart * pieChart = new CustomPieChart(this);
+    // CustomPieChart(parent)
 
-    CustomPieChart * pieChart_1 = new CustomPieChart("逆变器31（台）", "小型", 18, Qt::blue, this); // CustomPieChart(titleName, tag, data, color, parent)
+    CustomPieChart * pieChart_1 = new CustomPieChart("逆变器31（台）", "小型", 18, Qt::blue, this);
+    // CustomPieChart(titleName, tag, data, color, parent)
 
     QList<int> dataList = { 31, 25, 10 };
-    QList<QString> tagList = { "正常", "离线", "异常" };
+    QStringList tagList = { "正常", "离线", "异常" };
     QList<QColor> colorList = {QColor(57, 207, 206), QColor(232, 184, 232), Qt::yellow};
 
-    CustomPieChart * pieChart_2 = new CustomPieChart("数据采集器1（台）", tagList, dataList, colorList, this); // CustomPieChart(titleName, tagList, dataList, colorList, parent)
+    CustomPieChart * pieChart_2 = new CustomPieChart("数据采集器1（台）", tagList, dataList, colorList, this);
+    // CustomPieChart(titleName, tagList, dataList, colorList, parent)
 ```
 #### Add slice.
 ```c++
@@ -36,30 +39,30 @@
     tempFont.setPointSize(9);
     tempFont.setFamily("Microsoft YaHei");
     tempFont.setWeight(80);
-    pieChart->setGlobalFont(tempFont);
+    pieChart->setGlobalFont(tempFont); // QFont tempFont
 ```
 #### Set title font.
 ```c++
-    pieChart->setTitleFont(tempFont);
+    pieChart->setTitleFont(tempFont); // QFont tempFont
 ```
 #### Set tag font.
 ```c++
-    pieChart->setTagFont(tempFont);
+    pieChart->setTagFont(tempFont); // QFont tempFont
 ```
 #### Set legend font.
 ```c++
-    pieChart->setLegendFont(tempFont);
+    pieChart->setLegendFont(tempFont); // QFont tempFont
 ```
 #### Set sum font.
 ```c++
-    pieChart->setSumFont(tempFont);
+    pieChart->setSumFont(tempFont); // QFont tempFont
 ```
 #### Set "sum" text font.
 ```c++
-    pieChart->setSumTextFont(tempFont);
+    pieChart->setSumTextFont(tempFont); // QFont tempFont
 ```
 #### Set ring size.
 ```c++
-    pieChart->setRingSize(ringSize);
+    pieChart->setRingSize(ringSize); // double ringSize
 ```
 [customPieChart]: README/customPieChart.gif
